@@ -1,10 +1,10 @@
-# Wedding image placeholders
+# Wedding image assets
 
-Replace `wedding-storyboard.png` with licensed, client-approved imagery before launch. Keep the filename to avoid code changes.
+The current Bali wedding photographs were extracted at their original embedded resolution from `output/pdf/ever-after-story-company-profile-bali-ai.pdf`.
 
-- Hero: landscape image, ideally 1920 × 1080 (16:9), with the couple focused toward the right.
-- Mobile hero: the current CSS uses the same image with a 4:5 crop and a right-side focal point.
-- Portfolio: six portrait crops at 1200 × 1500 (4:5) are recommended for a final production pass. Update `content/portfolio.ts` and each image path when separate images are available.
-- Social preview: `public/og.png`, 1536 × 1024. Replace it whenever the brand photography or main message changes.
+- `bali-wedding-couple-wide.jpg` - 2916 × 2048 landscape; used for the hero, portfolio crops, and social preview.
+- `bali-wedding-bride-portrait.jpg` - 1365 × 2048 portrait; used for bridal-detail portfolio crops.
+- `bali-wedding-couple-portrait.jpg` - 1365 × 2048 portrait; used for close couple portfolio crops.
+- Social preview: `public/og.png`, a 1536 × 1024 branded card generated from the landscape reference image.
 
-The bundled storyboard is an AI-created placeholder and must not be presented as a real Ever After Story client wedding.
+Portfolio focal points are configured in `content/portfolio.ts`. These are AI-created reference images and should not be presented as photographs of real Ever After Story clients.

@@ -36,7 +36,7 @@ The inquiry form has no backend. It validates the required fields in the browser
 - Brand and links: `content/site-config.ts`
 - Image replacement notes: `public/images/README.md`
 
-Replace the AI-generated wedding storyboard and all placeholder testimonials with approved client material before the public launch.
+The current wedding imagery is the AI-generated Bali reference set extracted from the company-profile PDF. Replace it and all placeholder testimonials with approved client material before presenting the portfolio as real client work.
 
 ## Quality checks
 

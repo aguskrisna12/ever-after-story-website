@@ -4,7 +4,7 @@ export function HeroSection() {
   return (
     <section className="hero" id="home" aria-labelledby="hero-title">
       <div className="hero-media" aria-hidden="true">
-        <Image className="hero-image" src="/images/wedding-storyboard.png" alt="" fill priority unoptimized sizes="100vw" />
+        <Image className="hero-image" src="/images/bali-wedding-couple-wide.jpg" alt="" fill priority unoptimized sizes="100vw" />
       </div>
       <div className="container hero-content">
         <div className="hero-copy">
