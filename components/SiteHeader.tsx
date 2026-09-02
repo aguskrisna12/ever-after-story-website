@@ -32,8 +32,7 @@ export function SiteHeader() {
     <header className={`site-header${scrolled ? " scrolled" : ""}${menuOpen ? " menu-active" : ""}`}>
       <div className="container header-inner">
         <a className="brand" href="#home" aria-label="Ever After Story, home" onClick={closeMenu}>
-          Ever After Story
-          <small>Wedding content creator</small>
+          <span className="brand-logo" aria-hidden="true" />
         </a>
         <nav className="desktop-nav" aria-label="Primary navigation">
           {navigation.map((item) => <a className="nav-link" href={item.href} key={item.href}>{item.label}</a>)}

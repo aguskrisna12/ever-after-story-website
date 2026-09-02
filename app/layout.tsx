@@ -15,26 +15,43 @@ const bodyFont = Manrope({
   display: "swap",
 });
 
-const metadataBase = siteConfig.siteUrl
-  ? new URL(siteConfig.siteUrl)
-  : new URL("https://everafterstory.example");
+const metadataBase = new URL(siteConfig.siteUrl);
 
 export const metadata: Metadata = {
   metadataBase,
-  title: "Bali Wedding Content Creator | Ever After Story",
+  title: {
+    default: siteConfig.title,
+    template: `%s | ${siteConfig.name}`,
+  },
   description: siteConfig.description,
-  alternates: siteConfig.siteUrl ? { canonical: siteConfig.siteUrl } : undefined,
+  applicationName: siteConfig.name,
+  creator: siteConfig.name,
+  publisher: siteConfig.name,
+  category: "Wedding services",
+  alternates: { canonical: siteConfig.siteUrl },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
+    url: siteConfig.siteUrl,
     siteName: siteConfig.name,
-    title: "Bali Wedding Content Creator | Ever After Story",
+    title: siteConfig.title,
     description: siteConfig.description,
     images: [{ url: "/og.png", width: 1536, height: 1024, alt: "Ever After Story — Bali Wedding Content Creator" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Bali Wedding Content Creator | Ever After Story",
+    title: siteConfig.title,
     description: siteConfig.description,
     images: ["/og.png"],
   },

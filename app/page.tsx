@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { AboutSection } from "@/components/AboutSection";
 import { BenefitsSection } from "@/components/BenefitsSection";
 import { ContactSection } from "@/components/ContactSection";
@@ -11,24 +10,59 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { TestimonialSection } from "@/components/TestimonialSection";
 import { siteConfig } from "@/content/site-config";
 
-export const metadata: Metadata = {
-  title: "Bali Wedding Content Creator | Ever After Story",
-  description:
-    "Ever After Story creates natural, emotional, and social-ready wedding content for couples celebrating their love in Bali.",
-};
-
 export default function Home() {
-  const structuredData = siteConfig.siteUrl
-    ? {
-        "@context": "https://schema.org",
+  const businessId = `${siteConfig.siteUrl}/#business`;
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
         "@type": "ProfessionalService",
+        "@id": businessId,
         name: siteConfig.name,
+        slogan: siteConfig.tagline,
         description: siteConfig.description,
         url: siteConfig.siteUrl,
-        areaServed: "Bali, Indonesia",
+        image: `${siteConfig.siteUrl}/og.png`,
+        logo: `${siteConfig.siteUrl}/images/ever-after-story-logo-transparent.png`,
+        address: {
+          "@type": "PostalAddress",
+          addressRegion: "Bali",
+          addressCountry: "ID",
+        },
+        areaServed: {
+          "@type": "AdministrativeArea",
+          name: "Bali, Indonesia",
+        },
+        serviceType: [
+          "Wedding content creation",
+          "Destination wedding content",
+          "Social-ready wedding videos",
+        ],
         sameAs: [siteConfig.instagramUrl],
-      }
-    : null;
+        ...(siteConfig.whatsappNumber
+          ? {
+              telephone: `+${siteConfig.whatsappNumber}`,
+              contactPoint: {
+                "@type": "ContactPoint",
+                telephone: `+${siteConfig.whatsappNumber}`,
+                contactType: "customer service",
+                areaServed: "ID",
+                availableLanguage: ["English", "Indonesian"],
+              },
+            }
+          : {}),
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteConfig.siteUrl}/#website`,
+        url: siteConfig.siteUrl,
+        name: siteConfig.name,
+        description: siteConfig.description,
+        inLanguage: "en",
+        publisher: { "@id": businessId },
+      },
+    ],
+  };
 
   return (
     <>
@@ -47,12 +81,10 @@ export default function Home() {
         <ContactSection />
       </main>
       <SiteFooter />
-      {structuredData ? (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
-      ) : null}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
     </>
   );
 }

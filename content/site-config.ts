@@ -1,5 +1,6 @@
 export const siteConfig = {
   name: "Ever After Story",
+  title: "Bali Wedding Content Creator | Ever After Story",
   tagline: "Every Love Has a Story",
   location: "Bali, Indonesia",
   description:
@@ -8,7 +9,9 @@ export const siteConfig = {
     process.env.NEXT_PUBLIC_INSTAGRAM_URL ??
     "https://www.instagram.com/everafterstory.id/",
   whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/\D/g, "") ?? "",
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "",
+  siteUrl:
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
+    "https://ever-after-story-bali.netlify.app",
 } as const;
 
 export const navigation = [
