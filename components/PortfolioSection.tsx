@@ -12,9 +12,11 @@ export function PortfolioSection() {
         </div>
         <div className="portfolio-grid">
           {portfolioStories.map((story) => (
-            <article className="portfolio-item" key={story.couple}>
-              <div className="portfolio-media"><Image className="portfolio-image" src={story.image} alt={story.alt} fill unoptimized sizes="(max-width: 680px) 100vw, (max-width: 960px) 50vw, 33vw" style={{ objectPosition: story.objectPosition }} /></div>
-              <div className="portfolio-meta"><h3 className="portfolio-title">{story.couple}</h3><p className="portfolio-location">{story.location}</p><p className="portfolio-category">{story.category}</p></div>
+            <article className="portfolio-item" key={story.href}>
+              <a className="portfolio-link" href={story.href} target="_blank" rel="noopener noreferrer" aria-label={`Watch ${story.couple}'s wedding Reel on Instagram`}>
+                <div className="portfolio-media"><Image className="portfolio-image" src={story.image} alt={story.alt} fill unoptimized sizes="(max-width: 680px) 100vw, (max-width: 960px) 50vw, 33vw" style={{ objectPosition: story.objectPosition }} /></div>
+                <div className="portfolio-meta"><h3 className="portfolio-title">{story.couple}</h3><p className="portfolio-location">{story.location}</p><p className="portfolio-category">{story.category} · View Reel</p></div>
+              </a>
             </article>
           ))}
         </div>

@@ -5,6 +5,7 @@
 [build.environment]
   NODE_VERSION = "22.13.0"
   NEXT_PUBLIC_SITE_URL = "https://everafterstory.web.id"
+  NEXT_PUBLIC_WHATSAPP_NUMBER = "6281239383477"
 
 [[redirects]]
   from = "https://ever-after-story-bali.netlify.app/*"

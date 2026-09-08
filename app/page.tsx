@@ -8,6 +8,7 @@ import { ServicesSection } from "@/components/ServicesSection";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { TestimonialSection } from "@/components/TestimonialSection";
+import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { servicePackages } from "@/content/services";
 import { siteConfig } from "@/content/site-config";
 
@@ -97,6 +98,7 @@ export default function Home() {
         <ContactSection />
       </main>
       <SiteFooter />
+      <WhatsAppFloat />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}

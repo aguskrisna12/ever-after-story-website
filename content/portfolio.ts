@@ -5,13 +5,14 @@ export interface PortfolioStory {
   alt: string;
   image: string;
   objectPosition: string;
+  href: string;
 }
 
 export const portfolioStories: PortfolioStory[] = [
-  { couple: "Maya & Julian", location: "Uluwatu, Bali", category: "Clifftop Wedding", alt: "Balinese wedding couple walking together in a temple courtyard", image: "/images/bali-wedding-couple-wide.jpg", objectPosition: "75% center" },
-  { couple: "Sofia & Liam", location: "Canggu, Bali", category: "Villa Wedding", alt: "Bride in traditional Balinese wedding attire adjusting her earring", image: "/images/bali-wedding-bride-portrait.jpg", objectPosition: "50% 38%" },
-  { couple: "Ayu & Theo", location: "Sanur, Bali", category: "Intimate Wedding", alt: "Balinese wedding couple sharing a warm look at golden hour", image: "/images/bali-wedding-couple-portrait.jpg", objectPosition: "56% 42%" },
-  { couple: "Elena & Marco", location: "Ubud, Bali", category: "Garden Wedding", alt: "Traditional Balinese bride portrait framed by carved temple details", image: "/images/bali-wedding-bride-portrait.jpg", objectPosition: "50% 55%" },
-  { couple: "Amelia & Noah", location: "Nusa Dua, Bali", category: "Destination Wedding", alt: "Newlyweds in Balinese attire standing in a tropical courtyard", image: "/images/bali-wedding-couple-wide.jpg", objectPosition: "82% center" },
-  { couple: "Claire & Ben", location: "Seminyak, Bali", category: "Behind the Scenes", alt: "Candid close portrait of a Balinese wedding couple", image: "/images/bali-wedding-couple-portrait.jpg", objectPosition: "62% 58%" },
+  { couple: "Kresna & Devi", location: "Bali", category: "Bridal Portrait", alt: "Devi in traditional Balinese wedding attire", image: "/images/instagram-kresna-devi-details.jpg", objectPosition: "center 42%", href: "https://www.instagram.com/everafterstory.id/reel/DbRvj0Mv-FC/" },
+  { couple: "Gus Wahyu & Gek Yuni", location: "Bali", category: "Wedding Details", alt: "Gek Yuni wearing an ornate golden Balinese bridal headdress", image: "/images/instagram-gus-wahyu-gek-yuni.jpg", objectPosition: "center 38%", href: "https://www.instagram.com/everafterstory.id/reel/DbRu-eivGQO/" },
+  { couple: "Kresna & Devi", location: "Bali", category: "Traditional Wedding", alt: "Kresna and Devi in traditional Balinese wedding attire", image: "/images/instagram-kresna-devi-couple.jpg", objectPosition: "center 40%", href: "https://www.instagram.com/everafterstory.id/reel/DbRuo4fP5X1/" },
+  { couple: "Kresna & Devi", location: "Bali", category: "Bridal Preparation", alt: "Close portrait of Devi during her bridal makeup preparation", image: "/images/instagram-kresna-devi-bride.jpg", objectPosition: "center 38%", href: "https://www.instagram.com/everafterstory.id/reel/DbRubF_v4j4/" },
+  { couple: "Panditia & Pebriani", location: "Bali", category: "Wedding Portrait", alt: "Pebriani framed by wooden doors in traditional Balinese bridal attire", image: "/images/instagram-panditia-pebriani.jpg", objectPosition: "center 38%", href: "https://www.instagram.com/everafterstory.id/reel/DbRuMhfvI2Q/" },
+  { couple: "Gunawan & Opi", location: "Bali", category: "Wedding Celebration", alt: "Close detail of Gunawan and Opi in traditional Balinese wedding attire", image: "/images/instagram-gunawan-opi.jpg", objectPosition: "center 48%", href: "https://www.instagram.com/everafterstory.id/reel/DbRt3dtv2Gt/" },
 ];
