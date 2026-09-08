@@ -4,3 +4,16 @@
 
 [build.environment]
   NODE_VERSION = "22.13.0"
+  NEXT_PUBLIC_SITE_URL = "https://everafterstory.web.id"
+
+[[redirects]]
+  from = "https://ever-after-story-bali.netlify.app/*"
+  to = "https://everafterstory.web.id/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://ever-after-story-bali.netlify.app/*"
+  to = "https://everafterstory.web.id/:splat"
+  status = 301
+  force = true

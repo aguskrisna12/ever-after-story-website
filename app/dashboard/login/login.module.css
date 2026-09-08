@@ -1,0 +1,68 @@
+.loginPage {
+  --login-wine: #4b1720;
+  --login-wine-dark: #2f1016;
+  --login-gold: #c3a06f;
+  --login-paper: #f8f3ee;
+  --login-ink: #2b211f;
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(22rem, .92fr) minmax(28rem, 1.08fr);
+  background: var(--login-paper);
+  color: var(--login-ink);
+}
+
+.storyPanel {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(2rem, 5vw, 4.5rem);
+  overflow: hidden;
+  isolation: isolate;
+  background: #2d1b17 url("/images/bali-wedding-couple-wide.jpg") center / cover no-repeat;
+  color: #fff;
+}
+
+.storyPanel::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(29, 13, 13, .42), rgba(35, 13, 17, .78));
+}
+
+.brand { width: fit-content; color: #fff; }
+.logo { display: block; width: 10.2rem; height: 2.7rem; background: currentColor; -webkit-mask: url("/images/ever-after-story-logo-transparent.png") -.08rem -.7rem / 10.3rem auto no-repeat; mask: url("/images/ever-after-story-logo-transparent.png") -.08rem -.7rem / 10.3rem auto no-repeat; }
+.eyebrow { margin: 0 0 .8rem; color: var(--login-gold); font-size: .66rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.storyPanel h1 { max-width: 34rem; margin: 0; font-family: var(--font-display), Georgia, serif; font-size: clamp(3rem, 6vw, 5.8rem); font-weight: 500; letter-spacing: -.045em; line-height: .92; }
+.storyPanel h1 + p { max-width: 30rem; margin: 1.4rem 0 0; color: rgba(255, 255, 255, .74); font-size: .82rem; line-height: 1.7; }
+.location { margin: 0; color: rgba(255, 255, 255, .62); font-size: .63rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+
+.formPanel { display: grid; place-items: center; padding: clamp(2rem, 7vw, 7rem); }
+.formWrap { width: min(100%, 29rem); }
+.formWrap h2 { margin: 0; font-family: var(--font-display), Georgia, serif; font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 550; letter-spacing: -.04em; line-height: 1; }
+.intro { margin: 1rem 0 2.2rem; color: #796b66; font-size: .78rem; line-height: 1.6; }
+.error { margin: -1rem 0 1.3rem; padding: .85rem 1rem; border-left: 3px solid #8a3e3e; background: #f9e9e6; color: #74362f; font-size: .72rem; line-height: 1.5; }
+.loginForm { display: grid; gap: 1.1rem; }
+.loginForm label { display: grid; gap: .45rem; color: #6f625d; font-size: .68rem; font-weight: 750; }
+.loginForm input { width: 100%; height: 3.25rem; border: 1px solid #d9ccc5; border-radius: 0; padding: 0 1rem; background: #fffdfb; color: var(--login-ink); font: inherit; outline: none; }
+.loginForm input:focus { border-color: var(--login-gold); box-shadow: 0 0 0 3px rgba(195, 160, 111, .14); }
+.loginForm button { display: flex; justify-content: space-between; align-items: center; min-height: 3.3rem; margin-top: .45rem; border: 1px solid var(--login-wine); padding: .75rem 1.1rem; background: var(--login-wine); color: #fff; font-size: .72rem; font-weight: 800; letter-spacing: .06em; cursor: pointer; transition: background .2s ease, transform .2s ease; }
+.loginForm button:hover { background: var(--login-wine-dark); transform: translateY(-1px); }
+.loginForm button:focus-visible, .backLink:focus-visible { outline: 2px solid var(--login-gold); outline-offset: 3px; }
+.backLink { display: inline-block; margin-top: 1.8rem; color: var(--login-wine); font-size: .7rem; font-weight: 750; }
+.securityNote { margin: 2.6rem 0 0; padding-top: 1rem; border-top: 1px solid #ded3cd; color: #948681; font-size: .63rem; }
+
+@media (max-width: 800px) {
+  .loginPage { grid-template-columns: 1fr; }
+  .storyPanel { min-height: 24rem; padding: 1.6rem var(--page-pad) 2.2rem; }
+  .storyPanel h1 { max-width: 27rem; font-size: clamp(2.8rem, 12vw, 4.5rem); }
+  .storyPanel h1 + p { display: none; }
+  .formPanel { min-height: calc(100svh - 24rem); padding: 3rem var(--page-pad); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loginPage * { transition-duration: .01ms !important; }
+}
+

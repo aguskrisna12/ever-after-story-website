@@ -2,55 +2,21 @@
 
 import Link from "next/link";
 import type { FormEvent } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { servicePackages } from "@/content/services";
+import {
+  emptyDashboardData,
+  inquiryStatuses,
+  productionStatuses,
+  type DashboardData,
+  type Inquiry,
+  type InquiryStatus,
+} from "@/lib/dashboard-data";
 import styles from "@/app/dashboard/dashboard.module.css";
 
-type InquiryStatus = "Baru" | "Tindak lanjut" | "Proposal dikirim" | "Dipesan";
-type ProductionStatus = "Materi masuk" | "Editing" | "Review" | "Siap dikirim" | "Terkirim";
-
-interface Inquiry {
-  id: string;
-  couple: string;
-  eventDate: string;
-  location: string;
-  packageName: string;
-  source: string;
-  status: InquiryStatus;
-}
-
-interface ProductionItem {
-  id: string;
-  couple: string;
-  deliverable: string;
-  dueDate: string;
-  progress: number;
-  status: ProductionStatus;
-}
-
-interface DashboardData {
-  inquiries: Inquiry[];
-  production: ProductionItem[];
-}
-
 const STORAGE_KEY = "ever-after-story-dashboard-v1";
-
-const statusOptions: InquiryStatus[] = ["Baru", "Tindak lanjut", "Proposal dikirim", "Dipesan"];
-const productionFlow: ProductionStatus[] = ["Materi masuk", "Editing", "Review", "Siap dikirim", "Terkirim"];
-
-const sampleData: DashboardData = {
-  inquiries: [
-    { id: "inq-1", couple: "Amelia & Noah", eventDate: "2026-09-12", location: "Uluwatu", packageName: "The Signature Story", source: "Instagram", status: "Dipesan" },
-    { id: "inq-2", couple: "Sofia & Liam", eventDate: "2026-09-27", location: "Canggu", packageName: "The Intimate Story", source: "WhatsApp", status: "Proposal dikirim" },
-    { id: "inq-3", couple: "Ayu & Theo", eventDate: "2026-10-08", location: "Sanur", packageName: "The Complete Story", source: "Referral", status: "Tindak lanjut" },
-    { id: "inq-4", couple: "Elena & Marco", eventDate: "2026-11-15", location: "Ubud", packageName: "The Signature Story", source: "Website", status: "Baru" },
-  ],
-  production: [
-    { id: "prd-1", couple: "Maya & Julian", deliverable: "2 Reels + curated clips", dueDate: "2026-09-05", progress: 72, status: "Editing" },
-    { id: "prd-2", couple: "Claire & Ben", deliverable: "Highlight Reel", dueDate: "2026-09-07", progress: 90, status: "Review" },
-    { id: "prd-3", couple: "Olivia & Daniel", deliverable: "3 Reels + ceremony clips", dueDate: "2026-09-10", progress: 45, status: "Editing" },
-  ],
-};
+const statusOptions: InquiryStatus[] = [...inquiryStatuses];
+const productionFlow = [...productionStatuses];
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("id-ID", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(`${value}T12:00:00`));
@@ -60,34 +26,70 @@ function makeId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
-export function DashboardClient() {
-  const [data, setData] = useState<DashboardData>(sampleData);
-  const [hydrated, setHydrated] = useState(false);
+async function dashboardRequest<T>(url: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(url, { ...init, headers: { "content-type": "application/json", ...init?.headers } });
+  if (response.status === 401) {
+    window.location.assign("/dashboard/login");
+    throw new Error("Sesi login berakhir.");
+  }
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({ error: "Koneksi database gagal." })) as { error?: string };
+    throw new Error(body.error ?? "Koneksi database gagal.");
+  }
+  if (response.status === 204) return undefined as T;
+  return response.json() as Promise<T>;
+}
+
+export function DashboardClient({ username }: { username: string }) {
+  const [data, setData] = useState<DashboardData>(emptyDashboardData);
+  const [loading, setLoading] = useState(true);
+  const [syncError, setSyncError] = useState("");
+  const [saving, setSaving] = useState(false);
   const [todayLabel, setTodayLabel] = useState("");
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<InquiryStatus | "Semua">("Semua");
   const [formOpen, setFormOpen] = useState(false);
+  const [editingInquiry, setEditingInquiry] = useState<Inquiry | null>(null);
   const [notice, setNotice] = useState("");
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      const saved = window.localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        try {
-          setData(JSON.parse(saved) as DashboardData);
-        } catch {
-          window.localStorage.removeItem(STORAGE_KEY);
+  const refreshData = useCallback(async (quiet = false) => {
+    if (!quiet) setLoading(true);
+    try {
+      let latest = await dashboardRequest<DashboardData>("/api/dashboard/data");
+      if (!latest.inquiries.length && !latest.production.length) {
+        const saved = window.localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          try {
+            const localData = JSON.parse(saved) as DashboardData;
+            latest = await dashboardRequest<DashboardData>("/api/dashboard/import", {
+              method: "POST",
+              body: JSON.stringify(localData),
+            });
+          } catch {
+            window.localStorage.removeItem(STORAGE_KEY);
+          }
         }
       }
-      setTodayLabel(new Intl.DateTimeFormat("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(new Date()));
-      setHydrated(true);
-    }, 0);
-    return () => window.clearTimeout(timer);
+      setData(latest);
+      setSyncError("");
+    } catch (error) {
+      setSyncError(error instanceof Error ? error.message : "Koneksi database gagal.");
+    } finally {
+      if (!quiet) setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    if (hydrated) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }, [data, hydrated]);
+    const startup = window.setTimeout(() => {
+      setTodayLabel(new Intl.DateTimeFormat("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(new Date()));
+      void refreshData();
+    }, 0);
+    const interval = window.setInterval(() => void refreshData(true), 15_000);
+    return () => {
+      window.clearTimeout(startup);
+      window.clearInterval(interval);
+    };
+  }, [refreshData]);
 
   useEffect(() => {
     if (!formOpen) return;
@@ -116,44 +118,99 @@ export function DashboardClient() {
     window.setTimeout(() => setNotice(""), 2800);
   };
 
-  const addInquiry = (event: FormEvent<HTMLFormElement>) => {
+  const saveInquiry = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setSaving(true);
     const form = new FormData(event.currentTarget);
     const inquiry: Inquiry = {
-      id: makeId("inq"),
+      id: editingInquiry?.id ?? makeId("inq"),
       couple: String(form.get("couple")),
       eventDate: String(form.get("eventDate")),
       location: String(form.get("location")),
       packageName: String(form.get("packageName")),
       source: String(form.get("source")),
-      status: "Baru",
+      status: String(form.get("status")) as InquiryStatus,
     };
-    setData((current) => ({ ...current, inquiries: [inquiry, ...current.inquiries] }));
-    event.currentTarget.reset();
+    try {
+      const savedInquiry = editingInquiry
+        ? await dashboardRequest<Inquiry>(`/api/dashboard/inquiries/${encodeURIComponent(inquiry.id)}`, {
+            method: "PATCH",
+            body: JSON.stringify({ ...inquiry, id: undefined }),
+          })
+        : await dashboardRequest<Inquiry>("/api/dashboard/inquiries", { method: "POST", body: JSON.stringify(inquiry) });
+      setData((current) => ({
+        ...current,
+        inquiries: editingInquiry
+          ? current.inquiries.map((item) => (item.id === savedInquiry.id ? savedInquiry : item))
+          : [savedInquiry, ...current.inquiries],
+      }));
+      event.currentTarget.reset();
+      closeForm();
+      announce(editingInquiry ? "Perubahan inquiry tersinkron ke semua perangkat." : "Inquiry baru tersinkron ke semua perangkat.");
+    } catch (error) {
+      announce(error instanceof Error ? error.message : "Gagal menyimpan inquiry.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const openCreateForm = () => {
+    setEditingInquiry(null);
+    setFormOpen(true);
+  };
+
+  const openEditForm = (inquiry: Inquiry) => {
+    setEditingInquiry(inquiry);
+    setFormOpen(true);
+  };
+
+  const closeForm = () => {
     setFormOpen(false);
-    announce("Inquiry baru tersimpan di perangkat ini.");
+    setEditingInquiry(null);
   };
 
-  const updateInquiryStatus = (id: string, status: InquiryStatus) => {
-    setData((current) => ({
-      ...current,
-      inquiries: current.inquiries.map((item) => (item.id === id ? { ...item, status } : item)),
-    }));
-    announce("Status inquiry diperbarui.");
+  const deleteInquiry = async (inquiry: Inquiry) => {
+    if (!window.confirm(`Hapus inquiry ${inquiry.couple}? Data yang dihapus tidak dapat dikembalikan.`)) return;
+    try {
+      await dashboardRequest<void>(`/api/dashboard/inquiries/${encodeURIComponent(inquiry.id)}`, { method: "DELETE" });
+      setData((current) => ({ ...current, inquiries: current.inquiries.filter((item) => item.id !== inquiry.id) }));
+      announce(`Inquiry ${inquiry.couple} dihapus dari semua perangkat.`);
+    } catch (error) {
+      announce(error instanceof Error ? error.message : "Gagal menghapus inquiry.");
+    }
   };
 
-  const advanceProduction = (id: string) => {
-    setData((current) => ({
-      ...current,
-      production: current.production.map((item) => {
-        if (item.id !== id) return item;
-        const nextIndex = Math.min(productionFlow.indexOf(item.status) + 1, productionFlow.length - 1);
-        const nextStatus = productionFlow[nextIndex];
-        const nextProgress = nextStatus === "Terkirim" ? 100 : Math.min(item.progress + 18, 96);
-        return { ...item, status: nextStatus, progress: nextProgress };
-      }),
-    }));
-    announce("Progres produksi diperbarui.");
+  const updateInquiryStatus = async (id: string, status: InquiryStatus) => {
+    const existing = data.inquiries.find((item) => item.id === id);
+    if (!existing) return;
+    try {
+      const updated = await dashboardRequest<Inquiry>(`/api/dashboard/inquiries/${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        body: JSON.stringify({ ...existing, id: undefined, status }),
+      });
+      setData((current) => ({ ...current, inquiries: current.inquiries.map((item) => (item.id === id ? updated : item)) }));
+      announce("Status inquiry tersinkron.");
+    } catch (error) {
+      announce(error instanceof Error ? error.message : "Gagal memperbarui status.");
+    }
+  };
+
+  const advanceProduction = async (id: string) => {
+    const existing = data.production.find((item) => item.id === id);
+    if (!existing) return;
+    const nextIndex = Math.min(productionFlow.indexOf(existing.status) + 1, productionFlow.length - 1);
+    const nextStatus = productionFlow[nextIndex];
+    const nextProgress = nextStatus === "Terkirim" ? 100 : Math.min(existing.progress + 18, 96);
+    try {
+      const updated = await dashboardRequest<(typeof data.production)[number]>(`/api/dashboard/production/${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: nextStatus, progress: nextProgress }),
+      });
+      setData((current) => ({ ...current, production: current.production.map((item) => (item.id === id ? updated : item)) }));
+      announce("Progres produksi tersinkron.");
+    } catch (error) {
+      announce(error instanceof Error ? error.message : "Gagal memperbarui produksi.");
+    }
   };
 
   const exportCsv = () => {
@@ -185,8 +242,14 @@ export function DashboardClient() {
           <a href="#production"><span>04</span>Produksi</a>
         </nav>
         <div className={styles.sidebarFoot}>
-          <span className={styles.localDot} aria-hidden="true" />
-          <div><strong>Workspace lokal</strong><small>Data tersimpan di browser ini</small></div>
+          <div className={styles.workspaceStatus}>
+            <span className={styles.localDot} aria-hidden="true" />
+            <div><strong>Supabase terhubung</strong><small>Sinkron otomatis tiap 15 detik</small></div>
+          </div>
+          <div className={styles.accountRow}>
+            <div><small>Masuk sebagai</small><strong>{username}</strong></div>
+            <form action="/api/auth/logout" method="post"><button type="submit">Keluar</button></form>
+          </div>
         </div>
       </aside>
 
@@ -198,14 +261,15 @@ export function DashboardClient() {
             <p className={styles.dateLabel}>{todayLabel || "Memuat tanggal…"}</p>
           </div>
           <div className={styles.topbarActions}>
+            <button className={styles.secondaryButton} type="button" onClick={() => void refreshData()} disabled={loading}>{loading ? "Menyinkronkan…" : "Sinkronkan"}</button>
             <button className={styles.secondaryButton} type="button" onClick={exportCsv}>Ekspor CSV</button>
-            <button className={styles.primaryButton} type="button" onClick={() => setFormOpen(true)}>+ Inquiry baru</button>
+            <button className={styles.primaryButton} type="button" onClick={openCreateForm}>+ Inquiry baru</button>
           </div>
         </header>
 
-        <section className={styles.localNotice} aria-label="Informasi penyimpanan">
-          <strong>Mode perangkat pribadi</strong>
-          <span>Dashboard ini belum terhubung ke form website atau akun tim. Gunakan untuk pencatatan awal tanpa mengirim data klien ke server.</span>
+        <section className={`${styles.localNotice} ${syncError ? styles.syncError : ""}`} aria-label="Status sinkronisasi">
+          <strong>{syncError ? "Sinkronisasi terganggu" : "Data tersinkron"}</strong>
+          <span>{syncError || "Perubahan disimpan di Supabase dan akan muncul di perangkat lain maksimal dalam 15 detik."}</span>
         </section>
 
         <section className={styles.overviewSection} id="overview" aria-labelledby="overview-title">
@@ -241,7 +305,7 @@ export function DashboardClient() {
           </div>
           <div className={styles.tableWrap}>
             <table className={styles.inquiryTable}>
-              <thead><tr><th>Couple</th><th>Tanggal & lokasi</th><th>Paket</th><th>Sumber</th><th>Status</th></tr></thead>
+              <thead><tr><th>Couple</th><th>Tanggal & lokasi</th><th>Paket</th><th>Sumber</th><th>Status</th><th>Aksi</th></tr></thead>
               <tbody>
                 {filteredInquiries.map((inquiry) => (
                   <tr key={inquiry.id}>
@@ -254,9 +318,15 @@ export function DashboardClient() {
                         {statusOptions.map((status) => <option value={status} key={status}>{status}</option>)}
                       </select>
                     </td>
+                    <td>
+                      <div className={styles.rowActions}>
+                        <button type="button" onClick={() => openEditForm(inquiry)} aria-label={`Edit inquiry ${inquiry.couple}`}>Edit</button>
+                        <button className={styles.deleteButton} type="button" onClick={() => deleteInquiry(inquiry)} aria-label={`Hapus inquiry ${inquiry.couple}`}>Hapus</button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
-                {!filteredInquiries.length ? <tr><td colSpan={5}><div className={styles.emptyState}>Tidak ada inquiry yang sesuai filter.</div></td></tr> : null}
+                {!filteredInquiries.length ? <tr><td colSpan={6}><div className={styles.emptyState}>{loading ? "Memuat data dari Supabase…" : "Tidak ada inquiry yang sesuai filter."}</div></td></tr> : null}
               </tbody>
             </table>
           </div>
@@ -272,7 +342,7 @@ export function DashboardClient() {
                   <div><strong>{item.couple}</strong><span>{item.location} · {item.packageName}</span></div>
                 </article>
               ))}
-              {!booked.length ? <div className={styles.emptyState}>Belum ada booking yang dikonfirmasi.</div> : null}
+              {!booked.length ? <div className={styles.emptyState}>{loading ? "Memuat jadwal…" : "Belum ada booking yang dikonfirmasi."}</div> : null}
             </div>
           </section>
 
@@ -292,16 +362,17 @@ export function DashboardClient() {
       </main>
 
       {formOpen ? (
-        <div className={styles.modalBackdrop} role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setFormOpen(false); }}>
+        <div className={styles.modalBackdrop} role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeForm(); }}>
           <section className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="new-inquiry-title">
-            <div className={styles.modalHeading}><div><p className={styles.sectionEyebrow}>Pipeline</p><h2 id="new-inquiry-title">Tambah inquiry</h2></div><button type="button" onClick={() => setFormOpen(false)} aria-label="Tutup form">×</button></div>
-            <form className={styles.inquiryForm} onSubmit={addInquiry}>
-              <label><span>Nama couple</span><input name="couple" required placeholder="Contoh: Anna & Luca" /></label>
-              <label><span>Tanggal wedding</span><input name="eventDate" type="date" required /></label>
-              <label><span>Lokasi</span><input name="location" required placeholder="Uluwatu" /></label>
-              <label><span>Paket</span><select name="packageName" required>{servicePackages.map((item) => <option key={item.id}>{item.name}</option>)}</select></label>
-              <label><span>Sumber inquiry</span><select name="source" required><option>Instagram</option><option>WhatsApp</option><option>Website</option><option>Referral</option></select></label>
-              <div className={styles.formActions}><button className={styles.secondaryButton} type="button" onClick={() => setFormOpen(false)}>Batal</button><button className={styles.primaryButton} type="submit">Simpan inquiry</button></div>
+            <div className={styles.modalHeading}><div><p className={styles.sectionEyebrow}>Pipeline</p><h2 id="new-inquiry-title">{editingInquiry ? "Edit inquiry" : "Tambah inquiry"}</h2></div><button type="button" onClick={closeForm} aria-label="Tutup form">×</button></div>
+            <form className={styles.inquiryForm} onSubmit={saveInquiry}>
+              <label><span>Nama couple</span><input name="couple" required placeholder="Contoh: Anna & Luca" defaultValue={editingInquiry?.couple} /></label>
+              <label><span>Tanggal wedding</span><input name="eventDate" type="date" required defaultValue={editingInquiry?.eventDate} /></label>
+              <label><span>Lokasi</span><input name="location" required placeholder="Uluwatu" defaultValue={editingInquiry?.location} /></label>
+              <label><span>Paket</span><select name="packageName" required defaultValue={editingInquiry?.packageName ?? servicePackages[0]?.name}>{servicePackages.map((item) => <option key={item.id}>{item.name}</option>)}</select></label>
+              <label><span>Sumber inquiry</span><select name="source" required defaultValue={editingInquiry?.source ?? "Instagram"}><option>Instagram</option><option>WhatsApp</option><option>Website</option><option>Referral</option></select></label>
+              <label><span>Status</span><select name="status" required defaultValue={editingInquiry?.status ?? "Baru"}>{statusOptions.map((status) => <option value={status} key={status}>{status}</option>)}</select></label>
+              <div className={styles.formActions}><button className={styles.secondaryButton} type="button" onClick={closeForm} disabled={saving}>Batal</button><button className={styles.primaryButton} type="submit" disabled={saving}>{saving ? "Menyimpan…" : editingInquiry ? "Simpan perubahan" : "Simpan inquiry"}</button></div>
             </form>
           </section>
         </div>

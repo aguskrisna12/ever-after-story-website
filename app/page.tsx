@@ -8,6 +8,7 @@ import { ServicesSection } from "@/components/ServicesSection";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { TestimonialSection } from "@/components/TestimonialSection";
+import { servicePackages } from "@/content/services";
 import { siteConfig } from "@/content/site-config";
 
 export default function Home() {
@@ -38,6 +39,21 @@ export default function Home() {
           "Destination wedding content",
           "Social-ready wedding videos",
         ],
+        hasOfferCatalog: {
+          "@type": "OfferCatalog",
+          name: "Wedding Content Creation Packages",
+          itemListElement: servicePackages.map((service) => ({
+            "@type": "Offer",
+            name: service.name,
+            priceCurrency: "IDR",
+            price: service.price.replace(/\D/g, ""),
+            itemOffered: {
+              "@type": "Service",
+              name: service.name,
+              description: service.features.join(", "),
+            },
+          })),
+        },
         sameAs: [siteConfig.instagramUrl],
         ...(siteConfig.whatsappNumber
           ? {

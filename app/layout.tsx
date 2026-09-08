@@ -28,6 +28,12 @@ export const metadata: Metadata = {
   creator: siteConfig.name,
   publisher: siteConfig.name,
   category: "Wedding services",
+  verification: {
+    google: [
+      "9pWmklo7BI_twZeLtQ79WkU-zo4JKjfl5ippdVCN6-Y",
+      "hro6hCVjXH1YkFXfhux5t9UuUF-ityVOmodd9jUpzFg",
+    ],
+  },
   alternates: { canonical: siteConfig.siteUrl },
   robots: {
     index: true,

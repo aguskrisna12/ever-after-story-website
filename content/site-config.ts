@@ -11,7 +11,7 @@ export const siteConfig = {
   whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/\D/g, "") ?? "",
   siteUrl:
     process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
-    "https://ever-after-story-bali.netlify.app",
+    "https://everafterstory.web.id",
 } as const;
 
 export const navigation = [
